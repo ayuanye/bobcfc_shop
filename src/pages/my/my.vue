@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores'
+import '@/utils/http'
 
 const memberStore = useMemberStore()
+const getData = () => {
+  uni.request({
+    url: '/home/banner',
+    data: {},
+    method: 'GET',
+  })
+}
 </script>
 
 <template>
@@ -20,6 +28,7 @@ const memberStore = useMemberStore()
       保存用户信息
     </button>
     <button @tap="memberStore.clearProfile()" size="mini" plain type="warn">清理用户信息</button>
+    <button @tap="getData" size="mini" plain type="warn">测试按钮</button>
   </view>
 </template>
 
