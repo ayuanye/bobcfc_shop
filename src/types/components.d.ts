@@ -7,3 +7,6 @@ declare module 'vue' {
     XtxGuess: typeof XtxGuess
   }
 }
+
+// 组件实例类型   InstanceType<typeof 某一个组件名>就代表获取某一组件实例类型
+export type XtxGuessInstance = InstanceType<typeof XtxGuess>

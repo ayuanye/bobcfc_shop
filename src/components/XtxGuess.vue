@@ -7,13 +7,20 @@ const pageParams: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
+// 获取初始展示数据
 const guessList = ref<GoodsItem[]>([])
 const getHomeGoodsGuessLikeData = async () => {
   let res = await getHomeGoodsGuessLikeAPI(pageParams)
   guessList.value = res.result.items
 }
+// 组件挂载完毕
 onMounted(() => {
   getHomeGoodsGuessLikeData()
+})
+// 暴露方法
+defineExpose({
+  // getMore值键值对的键 暴露getHomeGoodsGuessLikeData方法，供父组件使用懒加载
+  getMore: getHomeGoodsGuessLikeData,
 })
 </script>
 

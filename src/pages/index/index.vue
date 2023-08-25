@@ -8,6 +8,7 @@ import XtxGuess from '@/components/XtxGuess.vue'
 import { getHmoeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
+import type { XtxGuessInstance } from '@/types/components'
 
 // 获取轮播图数据
 const bannerList = ref<BannerItem[]>([])
@@ -34,17 +35,30 @@ onLoad(() => {
   getHomeCategoryData()
   getHomeHotData()
 })
+
+const guessRef = ref<XtxGuessInstance>()
+// 滚动触底事件
+const onScrolltolower = () => {
+  console.log('滚动触底拉~~')
+  // 获取子组件暴露的方法
+  guessRef.value?.getMore()
+}
 </script>
 
 <template>
+  <!-- 自定义导航栏 -->
   <CustomNavbar />
-  <scroll-view class="scroll-view" scroll-y>
+  <!-- 滚动容器 -->
+  <scroll-view @scrolltolower="onScrolltolower" class="scroll-view" scroll-y>
+    <!-- 自定义轮播图 -->
     <XtxSwiper :list="bannerList" />
+    <!-- 分类面板 -->
     <CategoryPanel :list="categoryList" />
+    <!-- 热门推荐 -->
     <HotPanel :list="hotList" />
-    <XtxGuess />
+    <!-- 猜你喜欢 -->
+    <XtxGuess ref="guessRef" />
   </scroll-view>
-  <!-- <view class="index">index</view> -->
 </template>
 
 <style lang="scss">
