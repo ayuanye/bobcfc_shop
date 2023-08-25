@@ -36,9 +36,17 @@ onMounted(() => {
 })
 // 暴露方法
 defineExpose({
+  resetData,
   // getMore值键值对的键 暴露getHomeGoodsGuessLikeData方法，供父组件使用懒加载
   getMore: getHomeGoodsGuessLikeData,
 })
+
+// 重置数据
+const resetData = () => {
+  pageParams.page = 1
+  guessList.value = []
+  finish.value = false
+}
 </script>
 
 <template>
