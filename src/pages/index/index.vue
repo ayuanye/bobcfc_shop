@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
+import XtxSwiper from '@/components/XtxSwiper.vue'
+import XtxGuess from '@/components/XtxGuess.vue'
 import { getHmoeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import { onLoad } from '@dcloudio/uni-app'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
@@ -25,6 +27,8 @@ const getHomeHotData = async () => {
   const res = await getHomeHotAPI()
   hotList.value = res.result
 }
+// 获取猜你喜欢数据
+
 onLoad(() => {
   getHomeBannerData()
   getHomeCategoryData()
@@ -34,9 +38,12 @@ onLoad(() => {
 
 <template>
   <CustomNavbar />
-  <XtxSwiper :list="bannerList" />
-  <CategoryPanel :list="categoryList" />
-  <HotPanel :list="hotList" />
+  <scroll-view class="scroll-view" scroll-y>
+    <XtxSwiper :list="bannerList" />
+    <CategoryPanel :list="categoryList" />
+    <HotPanel :list="hotList" />
+    <XtxGuess />
+  </scroll-view>
   <!-- <view class="index">index</view> -->
 </template>
 
@@ -44,5 +51,11 @@ onLoad(() => {
 //
 page {
   background-color: #f7f7f7;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+.scroll-view {
+  flex: 1;
 }
 </style>
