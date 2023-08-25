@@ -3,15 +3,32 @@ import { getHomeGoodsGuessLikeAPI } from '@/services/home'
 import { onMounted, ref } from 'vue'
 import type { PageParams, GoodsItem } from '@/types/global'
 
+// 原本PageParams里面定义的page和pageSize除了数字类型还可以是其他的，所以 Required 代表必须要有类型
 const pageParams: Required<PageParams> = {
   page: 1,
   pageSize: 10,
 }
 // 获取初始展示数据
 const guessList = ref<GoodsItem[]>([])
+const finish = ref(false)
 const getHomeGoodsGuessLikeData = async () => {
   let res = await getHomeGoodsGuessLikeAPI(pageParams)
-  guessList.value = res.result.items
+  // 退出判断
+  if (finish.value == true) {
+    return uni.showToast({
+      title: '没有更多数据~~',
+      icon: 'none',
+    })
+  }
+  // guessList.value = res.result.items
+  // 数组追加
+  guessList.value.push(...res.result.items)
+  if (pageParams.page < res.result.pages) {
+    // 页码累加
+    pageParams.page++
+  } else {
+    finish.value = true
+  }
 }
 // 组件挂载完毕
 onMounted(() => {
@@ -44,7 +61,7 @@ defineExpose({
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view class="loading-text">{{ finish ? '没有更多数据~~' : ' 正在加载...' }} </view>
 </template>
 
 <style lang="scss">

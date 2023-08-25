@@ -36,8 +36,9 @@ export const getHomeHotAPI = () => {
 
 /**
  * 猜你喜欢-小程序
+ * data后面的？代表可传可不传
  */
-export const getHomeGoodsGuessLikeAPI = (data: PageParams) => {
+export const getHomeGoodsGuessLikeAPI = (data?: PageParams) => {
   return http<PageResult<GoodsItem>>({
     method: 'GET',
     url: '/home/goods/guessLike',
