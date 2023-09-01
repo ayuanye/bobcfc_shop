@@ -97,5 +97,28 @@
         "selectedIconPath": "static/tabs/user_selected.png"
       }
     ]
+  },
+  // 分包加载规则
+	"subPackages": [
+		{
+      // 子包的根目录
+			"root": "pagesMember",
+			"pages": [
+				{
+          // 页面路径和窗口表现
+					"path": "settings/settings",
+					"style": {
+						"navigationBarTitleText": "设置"
+					}
+				}
+			]
+		}
+	],
+  // 分包预下载规则  配置这个是为了进入到我的页面再加载设置页面
+  "preloadRule": {
+    "pages/my/my":{
+      "network": "all",
+      "packages": ["pagesMember"]
+    }
   }
 }
