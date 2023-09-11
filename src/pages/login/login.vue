@@ -41,7 +41,8 @@ const loginSuccess = (profile: LoginResult) => {
   // 设置延时器是为了让提示能出现在页面
   setTimeout(() => {
     // 跳转到tabBar页面，只能用switchTab，不能用navigateTo
-    uni.switchTab({ url: '/pages/index/index' })
+    // uni.switchTab({ url: '/pages/index/index' })
+    uni.navigateBack()
   }, 500)
 }
 </script>
