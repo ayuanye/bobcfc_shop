@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
 import { useGuessList } from '@/composables'
-import { deleteMemberCartAPI, getMemberCartAPI, putMemberCartBySkuIdAPI } from '@/services/cart'
+import {
+  deleteMemberCartAPI,
+  getMemberCartAPI,
+  putMemberCartBySkuIdAPI,
+  putMemberCartSelectedAPI,
+} from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
 import { onShow } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 // 获取会员Store
 const memberStore = useMemberStore()
@@ -44,6 +49,61 @@ const onDeleteCart = (skuId: string) => {
 const onChangeCount = async (ev: InputNumberBoxEvent) => {
   await putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
 }
+
+// 修改选中状态-单品修改
+const onChangeSelected = (item: CartItem) => {
+  // 是否选中 取反操作
+  item.selected = !item.selected
+  // 上面是前端数据更新了， 下面是更新后端数据
+  putMemberCartBySkuIdAPI(item.skuId, { selected: item.selected })
+}
+
+// 底部的全选勾选框  计算全选状态
+const isSelectedAll = computed(() => {
+  // .every()是用来检测数组元素是否都满足条件    测试数组的selected是否都是true或者false状态
+  return cartList.value.length && cartList.value.every((v) => v.selected)
+})
+
+// 修改全选的选中状态
+const onChangeSelectedAll = () => {
+  // 全选选中状态取反
+  const _isSelectedAll = !isSelectedAll.value
+  // 前端的数据更新
+  cartList.value.forEach((item) => {
+    item.selected = _isSelectedAll
+  })
+  // 后端数据更新
+  putMemberCartSelectedAPI({ selected: _isSelectedAll })
+}
+
+// 计算选中单品列表
+const selectedCartList = computed(() => {
+  // 返回选中单品的数据
+  return cartList.value.filter((v) => v.selected)
+})
+// 计算选中总件数
+const selectedCartListCount = computed(() => {
+  return selectedCartList.value.reduce((sum, item) => sum + item.count, 0)
+})
+// 计算总金额
+const selectedCartListMoney = computed(() => {
+  return selectedCartList.value
+    .reduce((sum, item) => sum + item.nowPrice * item.count, 0)
+    .toFixed(2)
+})
+
+// 去结算
+const gotoPayment = () => {
+  if (selectedCartListCount.value == 0) {
+    // 如果没有选择商品 给出提示并停止继续走方法
+    uni.showToast({
+      icon: 'none',
+      title: '请选择商品',
+    })
+    return
+  }
+  uni.showToast({ title: '等待完善' })
+}
 </script>
 
 <template>
@@ -64,7 +124,11 @@ const onChangeCount = async (ev: InputNumberBoxEvent) => {
             <!-- 商品信息 -->
             <view class="goods">
               <!-- 选中状态 -->
-              <text class="checkbox" :class="{ checked: true }"></text>
+              <text
+                class="checkbox"
+                @tap="onChangeSelected(item)"
+                :class="{ checked: item.selected }"
+              ></text>
               <navigator
                 :url="`/pages/goods/goods?id=${item.id}`"
                 hover-class="none"
@@ -107,11 +171,17 @@ const onChangeCount = async (ev: InputNumberBoxEvent) => {
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text class="all" :class="{ checked: true }">全选</text>
+        <text class="all" @tap="onChangeSelectedAll" :class="{ checked: isSelectedAll }">全选</text>
         <text class="text">合计:</text>
-        <text class="amount">100</text>
+        <text class="amount">{{ selectedCartListMoney }}</text>
         <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: true }"> 去结算(10) </view>
+          <view
+            class="button payment-button"
+            @tap="gotoPayment"
+            :class="{ disabled: selectedCartListCount === 0 }"
+          >
+            去结算({{ selectedCartListCount }})
+          </view>
         </view>
       </view>
     </template>
