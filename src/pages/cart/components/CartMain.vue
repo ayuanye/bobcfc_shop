@@ -115,7 +115,7 @@ const gotoPayment = () => {
 </script>
 
 <template>
-  <scroll-view scroll-y class="scroll-view" refresher-enabled @scrolltolower="onScrolltolower">
+  <scroll-view scroll-y class="scroll-view" enable-back-to-top @scrolltolower="onScrolltolower">
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
