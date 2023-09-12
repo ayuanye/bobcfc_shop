@@ -1,4 +1,4 @@
-<!-- tab 进入的购物车页面 -->
+<!-- 普通商品详情 进入的购物车页面 -->
 
 <script lang="ts" setup>
 // @ts-ignore
@@ -7,6 +7,6 @@ import CartMain from './components/CartMain.vue'
 
 <template>
   <div>
-    <CartMain />
+    <CartMain safe-area-inset-bottom />
   </div>
 </template>
