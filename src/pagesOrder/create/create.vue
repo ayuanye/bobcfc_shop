@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 // @ts-ignore
 import type { OrderPreResult } from '@/types/order'
 // @ts-ignore
-import { getMemberOrderPreAPI } from '@/services/order'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAddressStore } from '@/stores/modules/address'
 
@@ -26,11 +26,27 @@ const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
   activeIndex.value = ev.detail.value
 }
 
+// 页面参数
+const query = defineProps<{
+  skuId?: string
+  count?: string
+}>()
+
 // 获取订单信息
 const orderPre = ref<OrderPreResult>()
 const getMemberOrderPreData = async () => {
-  let res = await getMemberOrderPreAPI()
-  orderPre.value = res.result
+  // 判断是不是从商品页点击立即购买进入该页
+  if (query.count && query.skuId) {
+    let res = await getMemberOrderPreNowAPI({
+      skuId: query.skuId,
+      count: query.count,
+    })
+    orderPre.value = res.result
+  } else {
+    // 从购物车点击购买进入填写订单页
+    let res = await getMemberOrderPreAPI()
+    orderPre.value = res.result
+  }
 }
 onLoad(() => {
   getMemberOrderPreData()
@@ -39,6 +55,7 @@ onLoad(() => {
 const addressStore = useAddressStore()
 // 收货地址
 const selecteAddress = computed(() => {
+  console.log(addressStore, '==========')
   // 先设为默认地址 后面是选择的地址
   return addressStore.selectedAddress || orderPre.value?.userAddresses.find((v) => v.isDefault)
 })
