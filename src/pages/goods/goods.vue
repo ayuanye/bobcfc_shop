@@ -13,6 +13,9 @@ import type {
 import AddressPanel from './components/AddressPanel.vue'
 // @ts-ignore
 import ServicePanel from './components/ServicePanel.vue'
+import type { AddressItem } from '@/types/address'
+import { getMemberAddressAPI } from '@/services/address'
+import { useAddressStore } from '@/stores/modules/address'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
@@ -78,11 +81,17 @@ const popup = ref<{
 }>()
 // 弹出层条件渲染
 const popupName = ref<'address' | 'service'>() //是指定义popupName的值只能是adress或者service
-const openPopup = (name: typeof popupName.value) => {
+const addressList = ref<AddressItem[]>()
+const openPopup = async (name: typeof popupName.value) => {
   // 修改弹出层名称
   popupName.value = name
   popup.value?.open()
+  let res = await getMemberAddressAPI()
+  addressList.value = res.result
 }
+
+// 选择收获地址
+const addressStore = useAddressStore()
 
 // 是否显示SKU
 const isShowSKU = ref(false)
@@ -177,7 +186,13 @@ const onBuyNow = (ev: SkuPopupEvent) => {
         </view>
         <view class="item arrow" @tap="openPopup('address')">
           <text class="label">送至</text>
-          <text class="text ellipsis"> 请选择收获地址 </text>
+          <text class="text ellipsis">
+            {{
+              addressStore.getAddress
+                ? addressStore.getAddress.fullLocation + '' + addressStore.getAddress.address
+                : '请选择收获地址'
+            }}
+          </text>
         </view>
         <view class="item arrow" @tap="openPopup('service')">
           <text class="label">服务</text>
@@ -253,7 +268,11 @@ const onBuyNow = (ev: SkuPopupEvent) => {
 
   <!-- uni-ui 弹出层 -->
   <uni-popup ref="popup" type="bottom" background-color="#fff">
-    <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
+    <AddressPanel
+      v-if="popupName === 'address'"
+      @close="popup?.close()"
+      :addressList="addressList"
+    />
     <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
   </uni-popup>
 </template>

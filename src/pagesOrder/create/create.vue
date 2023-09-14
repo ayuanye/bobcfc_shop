@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 // @ts-ignore
 import type { OrderPreResult } from '@/types/order'
 // @ts-ignore
-import { getMemberOrderPreAPI, getMemberOrderPreNowAPI } from '@/services/order'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAddressStore } from '@/stores/modules/address'
 
@@ -55,10 +55,27 @@ onLoad(() => {
 const addressStore = useAddressStore()
 // 收货地址
 const selecteAddress = computed(() => {
-  console.log(addressStore, '==========')
   // 先设为默认地址 后面是选择的地址
   return addressStore.selectedAddress || orderPre.value?.userAddresses.find((v) => v.isDefault)
 })
+
+// 提交订单
+const onOrderSubmit = async () => {
+  if (!selecteAddress.value?.id) {
+    return uni.showToast({ title: '请选择收货地址' })
+  }
+  // 发送请求
+  let res = await postMemberOrderAPI({
+    addressId: selecteAddress.value.id,
+    buyerMessage: buyerMessage.value,
+    deliveryTimeType: activeDelivery.value.type,
+    goods: orderPre.value!.goods.map((v) => ({ count: v.count, skuId: v.skuId })),
+    payChannel: 2,
+    payType: 1,
+  })
+  // 关闭当前页面，跳转到订单详情，传递订单ID
+  uni.redirectTo({ url: `/pagesOrder/detail/detail?id=${res.result.id}` })
+}
 </script>
 
 <template>
@@ -143,7 +160,7 @@ const selecteAddress = computed(() => {
     <view class="total-pay symbol">
       <text class="number">{{ orderPre?.summary.totalPayPrice.toFixed(2) }}</text>
     </view>
-    <view class="button" :class="{ disabled: true }"> 提交订单 </view>
+    <view class="button" :class="{ disabled: false }" @tap="onOrderSubmit"> 提交订单 </view>
   </view>
 </template>
 

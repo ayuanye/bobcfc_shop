@@ -1,8 +1,24 @@
 <script setup lang="ts">
+import { useAddressStore } from '@/stores/modules/address'
+import type { AddressItem } from '@/types/address'
+import { ref } from 'vue'
+
 //
 const emit = defineEmits<{
   (event: 'close'): void
 }>()
+
+defineProps<{
+  addressList: AddressItem[]
+}>()
+
+const addressStore = useAddressStore()
+// 修改选中的状态
+const addressListData = ref<AddressItem>()
+const onChangeSelected = (item: AddressItem) => {
+  addressStore.getSelectAddress(item)
+  emit('close')
+}
 </script>
 
 <template>
@@ -12,25 +28,21 @@ const emit = defineEmits<{
     <!-- 标题 -->
     <view class="title">配送至</view>
     <!-- 内容 -->
-    <view class="content">
-      <view class="item">
-        <view class="user">李明 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-checked"></text>
+    <scroll-view class="scroll-view content" scroll-y>
+      <view class="item" v-for="item in addressList" :key="item.id">
+        <view class="user">{{ item.receiver }} {{ item.contact }}</view>
+        <view class="address">{{ item.fullLocation }} {{ item.address }}</view>
+        <text
+          class="icon icon-checked"
+          :class="addressListData ? 'checked' : 'icon icon-checked'"
+          @tap="onChangeSelected(item)"
+        ></text>
       </view>
-      <view class="item">
-        <view class="user">王东 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-      <view class="item">
-        <view class="user">张三 13824686868</view>
-        <view class="address">北京市朝阳区孙河安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-    </view>
+    </scroll-view>
     <view class="footer">
-      <view class="button primary"> 新建地址 </view>
+      <navigator class="button primary" url="/pagesMember/address-form/address-form">
+        新建地址
+      </navigator>
       <view v-if="false" class="button primary">确定</view>
     </view>
   </view>
@@ -81,8 +93,12 @@ const emit = defineEmits<{
     top: 50%;
     right: 0;
   }
-  .icon-checked {
+  &.checked::before {
+    content: '\e6cc';
     color: #27ba9b;
+  }
+  .icon-checked {
+    // color: #27ba9b;
   }
   .icon-ring {
     color: #444;

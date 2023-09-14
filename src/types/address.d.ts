@@ -22,4 +22,6 @@ export type AddressItem = AddressParams & {
   id: string
   /** 省市区 */
   fullLocation: string
+  // 是否选中
+  isselected: boolean
 }
