@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import { getMemberOrderByIdAPI, getMemberOrderConsignmentByIdAPI } from '@/services/order'
+import {
+  getMemberOrderByIdAPI,
+  getMemberOrderConsignmentByIdAPI,
+  putMemberOrderReceiptByIdAPI,
+} from '@/services/order'
 import type { OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { OrderState, orderStateList } from '@/services/constans'
@@ -100,7 +104,7 @@ const onOrderPay = async () => {
     wx.requestPayment((await res).result)
   }
   // 关闭当前页面，在跳转支付结果页
-  uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+  // uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
 }
 
 // 是否为开发环境
@@ -113,6 +117,21 @@ const onOredrSend = async () => {
     // 主动更新订单状态
     order.value!.orderState = OrderState.DaiShouHuo
   }
+}
+
+// 确认收货
+const onOrderConfirm = async () => {
+  // 二次确认弹框
+  uni.showModal({
+    content: '为保障您的权益，请收到货并确认无误后，再确认收货',
+    success: async (success) => {
+      if (success.confirm) {
+        const res = await putMemberOrderReceiptByIdAPI(query.id)
+        // 更新订单状态
+        order.value = res.result
+      }
+    },
+  })
 }
 </script>
 
@@ -173,7 +192,12 @@ const onOredrSend = async () => {
               模拟发货
             </view>
             <!-- 待收获状态：展示确认收货按钮 -->
-            <view v-if="false" class="button">确认发货</view>
+            <view
+              v-if="order.orderState == OrderState.DaiShouHuo"
+              class="button"
+              @tap="onOrderConfirm"
+              >确认收货</view
+            >
           </view>
         </template>
       </view>
