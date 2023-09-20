@@ -5,6 +5,8 @@ import type { OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { OrderState, orderStateList } from '@/services/constans'
 import { ref } from 'vue'
+import uniCountdown from '@dcloudio/uni-ui/lib/uni-countdown/uni-countdown'
+import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -80,6 +82,26 @@ const getMemberOrderByIdData = async () => {
 onLoad(() => {
   getMemberOrderByIdData()
 })
+
+// 倒计时结束事件
+const onTimeup = () => {
+  // 修改订单状态为已取消
+  order.value!.orderState = OrderState.YiQuXiao
+}
+
+// 去支付
+const onOrderPay = async () => {
+  // 判断是否是开发环境
+  if (import.meta.env.DEV) {
+    await getPayMockAPI({ orderId: query.id })
+  } else {
+    // 正式环境微信支付
+    const res = getPayWxPayMiniPayAPI({ orderId: query.id })
+    wx.requestPayment((await res).result)
+  }
+  // 关闭当前页面，在跳转支付结果页
+  uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+}
 </script>
 
 <template>
@@ -106,9 +128,17 @@ onLoad(() => {
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            00 时 29 分 59 秒
+            <!-- 倒计时组件 -->
+            <uni-countdown
+              :second="order.countdown"
+              color="#fff"
+              splitor-color="#fff"
+              :show-day="false"
+              :show-colon="false"
+              @timeup="onTimeup"
+            />
           </view>
-          <view class="button">去支付</view>
+          <view class="button" @tap="onOrderPay">去支付</view>
         </template>
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
@@ -211,7 +241,7 @@ onLoad(() => {
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
         <template v-if="true">
-          <view class="button primary"> 去支付 </view>
+          <view class="button primary" @tap="onOrderPay"> 去支付 </view>
           <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
         </template>
         <!-- 其他订单状态:按需展示按钮 -->
