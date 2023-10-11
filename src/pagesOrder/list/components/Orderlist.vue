@@ -41,8 +41,11 @@ const onOrderPay = async (id: string) => {
     await wx.requestPayment(res.result)
     // #endif
   }
-  // 关闭当前页，再跳转支付结果页
-  uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${id}` })
+  // 成功的提示
+  uni.showToast({ title: '支付成功！' })
+  // 更新订单状态
+  const order = orderList.value!.find((v) => v.id == id)
+  order!.orderState = OrderState.DaiFaHuo
 }
 </script>
 
@@ -83,7 +86,7 @@ const onOrderPay = async (id: string) => {
       <view class="action">
         <!-- 待付款状态：显示去支付按钮 -->
         <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view class="button primary">去支付</view>
+          <view class="button primary" @tap="onOrderPay(order.id)">去支付</view>
         </template>
         <template v-else>
           <navigator
