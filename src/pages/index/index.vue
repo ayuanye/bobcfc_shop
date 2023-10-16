@@ -97,7 +97,10 @@ const onRefresherrefresh = async () => {
 </template>
 
 <style lang="scss">
-//
+/* #ifdef APP-PLUS */
+// 为了app里面针对page元素的display没有父元素，所以这里是为了将app元素设置成父元素
+#app
+/* #endif */
 page {
   background-color: #f7f7f7;
   display: flex;
