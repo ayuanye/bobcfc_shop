@@ -20,6 +20,7 @@ onLoad(() => {
 // 修改头像
 const memberStore = useMemberStore()
 const onAvatarChange = () => {
+  // #ifdef MP-WEIXIN
   // 调用拍照/选择图片
   uni.chooseMedia({
     // 文件个数
@@ -28,25 +29,40 @@ const onAvatarChange = () => {
     mediaType: ['image'],
     success: (res) => {
       const { tempFilePath } = res.tempFiles[0]
-      // 文件上传
-      uni.uploadFile({
-        url: '/member/profile/avatar',
-        filePath: tempFilePath,
-        sourceType: ['album', 'camera'],
-        name: 'file',
-        success: (res) => {
-          if (res.statusCode == 200) {
-            const avatar = JSON.parse(res.data).result.avatar
-            // 个人信息页数据更新
-            profile.value!.avatar = avatar
-            // store头像更新
-            memberStore.profile!.avatar = avatar
-            uni.showToast({ title: '更新成功', icon: 'success' })
-          } else {
-            uni.showToast({ title: '出现错误', icon: 'error' })
-          }
-        },
-      })
+      unloadFile(tempFilePath)
+    },
+  })
+  // #endif
+
+  // #ifdef H5 || APP-PLUS
+  uni.chooseImage({
+    count: 1,
+    success: (res) => {
+      const tempFilePath = res.tempFilePaths[0]
+      unloadFile(tempFilePath)
+    },
+  })
+  // #endif
+}
+// 上传文件的封装
+const unloadFile = (tempFilePath: string) => {
+  // 文件上传
+  uni.uploadFile({
+    url: '/member/profile/avatar',
+    filePath: tempFilePath,
+    sourceType: ['album', 'camera'],
+    name: 'file',
+    success: (res) => {
+      if (res.statusCode == 200) {
+        const avatar = JSON.parse(res.data).result.avatar
+        // 个人信息页数据更新
+        profile.value!.avatar = avatar
+        // store头像更新
+        memberStore.profile!.avatar = avatar
+        uni.showToast({ title: '更新成功', icon: 'success' })
+      } else {
+        uni.showToast({ title: '出现错误', icon: 'error' })
+      }
     },
   })
 }
