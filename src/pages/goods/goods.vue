@@ -252,9 +252,11 @@ const onBuyNow = (ev: SkuPopupEvent) => {
   <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
     <view class="icons">
       <button class="icons-button"><text class="icon-heart"></text>收藏</button>
+      <!-- #ifdef MP-WEIXIN -->
       <button class="icons-button" open-type="contact">
         <text class="icon-handset"></text>客服
       </button>
+      <!-- #endif -->
       <!-- 当跳转路由是普通页面时  open-type写navigate   跳转路由是tab时写switchTab-->
       <navigator class="icons-button" url="/pages/cart/cart2" open-type="navigate">
         <text class="icon-cart"></text>购物车
@@ -278,6 +280,11 @@ const onBuyNow = (ev: SkuPopupEvent) => {
 </template>
 
 <style lang="scss">
+/* #ifdef H5||APP-PLUS */
+.toolbar .icons .navigator-wrap {
+  flex: 1;
+}
+/* #endif */
 page {
   height: 100%;
   overflow: hidden;
